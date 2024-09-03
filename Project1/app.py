@@ -4,39 +4,54 @@ import pickle
 
 # Load the machine learning model
 def load_model():
-    with open(r'C:\Users\gokul\Documents\GitHub\Streamlit\Project1\diabetes.pkl', 'rb') as file:
-        model = pickle.load(file)
-    return model
+    try:
+        with open(r'C:\Users\gokul\Documents\GitHub\Streamlit\Project1\diabetes.pkl', 'rb') as file:
+            model_data = pickle.load(file)
+        return model_data
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
-data = load_model()
+def main():
+    data = load_model()
+    if data is None:
+        return  # Stop execution if model loading fails
 
-model = data["model"]
-scaler = data["scaler"]
+    model = data["model"]
+    scaler = data["scaler"]
 
-# Title of the app
-st.title("Diabetes Prediction")
+    # Title of the app
+    st.title("Diabetes Prediction")
 
-# Input fields for user
-pregnancies = st.number_input('Pregnancies', min_value=0, max_value=20, step=1)
-glucose = st.number_input('Glucose', min_value=0, max_value=200)
-blood_pressure = st.number_input('Blood Pressure', min_value=0, max_value=140)
-skin_thickness = st.number_input('Skin Thickness', min_value=0, max_value=100)
-insulin = st.number_input('Insulin', min_value=0, max_value=900)
-bmi = st.number_input('BMI', min_value=0.0, max_value=70.0, format="%.1f")
-diabetes_pedigree_function = st.number_input('Diabetes Pedigree Function', min_value=0.0, max_value=2.5, format="%.3f")
-age = st.number_input('Age', min_value=0, max_value=120)
+    # Input fields for user
+    pregnancies = st.number_input('Pregnancies', min_value=0, max_value=20, step=1)
+    glucose = st.number_input('Glucose', min_value=0, max_value=200)
+    blood_pressure = st.number_input('Blood Pressure', min_value=0, max_value=140)
+    skin_thickness = st.number_input('Skin Thickness', min_value=0, max_value=100)
+    insulin = st.number_input('Insulin', min_value=0, max_value=900)
+    bmi = st.number_input('BMI', min_value=0.0, max_value=70.0, format="%.1f")
+    diabetes_pedigree_function = st.number_input('Diabetes Pedigree Function', min_value=0.0, max_value=2.5, format="%.3f")
+    age = st.number_input('Age', min_value=0, max_value=120)
 
-# Prediction button
-if st.button('Predict'):
-    # Collect the inputs in a numpy array
-    input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, 
-                            bmi, diabetes_pedigree_function, age]])
-    
-    # Scale the inputs
-    input_transform = scaler.transform(input_data)
-    
-    # Make predictions
-    prediction = model.predict(input_transform)
-    
-    # Display the prediction
-    st.write(f"Predicted Outcome: {'Diabetic' if prediction[0] == 1 else 'Not Diabetic'}")
+    # Prediction button
+    if st.button('Predict'):
+        # Collect the inputs in a numpy array
+        input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, 
+                                bmi, diabetes_pedigree_function, age]])
+        
+        # Debug: Check input data shape and content
+        st.write(f"Input Data: {input_data}")
+
+        try:
+            # Scale the inputs
+            input_transform = scaler.transform(input_data)
+            # Make predictions
+            prediction = model.predict(input_transform)
+            # Display the prediction
+            st.write(f"Predicted Outcome: {'Diabetic' if prediction[0] == 1 else 'Not Diabetic'}")
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+
+# Run the main function
+if __name__ == '__main__':
+    main()
