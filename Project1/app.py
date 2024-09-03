@@ -5,11 +5,14 @@ import matplotlib.pyplot as plt
 
 # Load the machine learning model
 def load_model():
-    with open('xyz.pkl', 'rb') as file:
-        model = pickle.load(file)
-    return model
+    with open(r'C:\Users\gokul\Documents\GitHub\Streamlit\Project1\saved_packages.pkl', 'rb') as file:
+        data = pickle.load(file)
+    return data
 
-model = load_model()
+data = load_model()
+
+model = data['model']
+scaler = data['scaler']
 
 # Title of the app
 st.title("Diabetes Prediction")
@@ -27,23 +30,20 @@ age = st.number_input('Age', min_value=0, max_value=120)
 # Prediction button
 if st.button('Predict'):
     # Collect the inputs in a numpy array
-    input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, 
-                            bmi, diabetes_pedigree_function, age]])
+    input_data = (pregnancies, glucose, blood_pressure, skin_thickness, insulin, 
+                            bmi, diabetes_pedigree_function, age)
     
-    # Make predictions
-    prediction = model.predict(input_data)
+    # Convert the input data to numpy array
+    input_data_as_numpy_array = np.asarray(input_data)
+
+    # Reshape the array as we are predicting for one instance
+    input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
+
+    # Standardize the input data
+    std_data = scaler.transform(input_data_reshaped)
+
+    # Make the prediction
+    prediction = model.predict(std_data)
     
-    # Display the prediction
+    # Display the prediction result
     st.write(f"Predicted Outcome: {'Diabetic' if prediction[0] == 1 else 'Not Diabetic'}")
-    
-    # Plotting the result
-    st.subheader("Prediction Probability")
-    prediction_proba = model.predict_proba(input_data)[0]
-    
-    fig, ax = plt.subplots()
-    labels = ['Not Diabetic', 'Diabetic']
-    ax.bar(labels, prediction_proba, color=['blue', 'red'])
-    ax.set_ylim([0, 1])
-    ax.set_ylabel('Probability')
-    
-    st.pyplot(fig)
