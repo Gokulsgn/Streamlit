@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
 
 # Load the machine learning model
 def load_model():
@@ -9,7 +8,10 @@ def load_model():
         model = pickle.load(file)
     return model
 
-model = load_model()
+data = load_model()
+
+model = data["model"]
+scaler = data["scaler"]
 
 # Title of the app
 st.title("Diabetes Prediction")
@@ -30,10 +32,11 @@ if st.button('Predict'):
     input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, 
                             bmi, diabetes_pedigree_function, age]])
     
+    # Scale the inputs
+    input_transform = scaler.transform(input_data)
+    
     # Make predictions
-    prediction = model.predict(input_data)
+    prediction = model.predict(input_transform)
     
     # Display the prediction
     st.write(f"Predicted Outcome: {'Diabetic' if prediction[0] == 1 else 'Not Diabetic'}")
-    
-
